@@ -2,6 +2,11 @@
 
 for i in `seq -f %02g 2 25`
 do
+  mkdir -p "AOC ${i}/hard/"
+  mkdir -p "AOC ${i}/simple/"
+  mkdir -p "AOC ${i}/test/"
+  mkdir -p "AOC ${i}/data/"
+  
   cat "AOC 01/hard/hard.cpp" | sed -e "s|AOC 01|AOC ${i}|g" > "AOC ${i}/hard/hard.cpp"
   cat "AOC 01/simple/simple.cpp" | sed -e "s|AOC 01|AOC ${i}|g" > "AOC ${i}/simple/simple.cpp"
   cat "AOC 01/test/test.cpp" | sed -e "s|AOC 01|AOC ${i}|g" > "AOC ${i}/test/test.cpp"
