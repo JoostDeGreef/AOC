@@ -21,10 +21,10 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{a1945797-3ab6-428f-0002-000000000002}</ProjectGuid>
+    <ProjectGuid>{a1945797-3ab6-428f-0019-000000000002}</ProjectGuid>
     <RootNamespace>AOC1test</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>AOC 02 simple</ProjectName>
+    <ProjectName>AOC 19 simple</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
