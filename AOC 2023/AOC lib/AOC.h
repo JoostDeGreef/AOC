@@ -5,14 +5,34 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 namespace AOC
 {
-    template<typename SEQUENCE>
-    SEQUENCE Reverse(const SEQUENCE& sequence)
+    template<typename T> T Reverse(T t)
     {
-        SEQUENCE res = { sequence.rbegin(),sequence.rend() };
-        return res;
+        return { t.rbegin(),t.rend() };
+    }
+
+    template<typename T> T Sort(T t)
+    {
+        std::sort(t.begin(), t.end());
+        return t;
+    }
+
+    inline std::vector<std::string> CaseInsensitiveSort(std::vector<std::string> v)
+    {
+        std::sort(v.begin(), v.end(), [](const std::string& str1, const std::string& str2)
+            {
+                return lexicographical_compare(
+                    begin(str1), end(str1),
+                    begin(str2), end(str2),
+                    [](const char& char1, const char& char2)
+                    {
+                        return tolower(char1) < tolower(char2);
+                    });
+            });
+        return v;
     }
 }
 

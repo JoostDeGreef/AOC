@@ -37,6 +37,9 @@
     <ClCompile Include="tests\GenericTest.cpp">
       <Filter>tests</Filter>
     </ClCompile>
+    <ClCompile Include="tests\SnippitsTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="helpers\ConsoleOutput.h">

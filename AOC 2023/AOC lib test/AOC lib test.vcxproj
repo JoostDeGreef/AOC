@@ -147,6 +147,7 @@
     <ClCompile Include="tests\GenericTest.cpp" />
     <ClCompile Include="tests\CharacterMatrixTest.cpp" />
     <ClCompile Include="tests\LineTest.cpp" />
+    <ClCompile Include="tests\SnippitsTest.cpp" />
     <ClCompile Include="tests\TextFileTest.cpp" />
   </ItemGroup>
   <ItemGroup>
