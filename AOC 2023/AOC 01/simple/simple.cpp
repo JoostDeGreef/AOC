@@ -26,7 +26,7 @@ int main()
             sum += i;
         }
     }
-    cout << "sum = " << sum << endl;
+    cout << "sum = " << sum << " (answered 55090)" << endl;
     return 0;
 }
 

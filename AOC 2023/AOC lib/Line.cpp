@@ -28,3 +28,12 @@ const vector<string> Line::GetWords() const
     return words;
 }
 
+Line Line::Replaced(const string& key, const string& value) const
+{
+    return AOC::Replace(line, key, value);
+}
+Line & Line::Replace(const string& key, const string& value)
+{
+    line = AOC::Replace(line, key, value);
+    return *this;
+}
