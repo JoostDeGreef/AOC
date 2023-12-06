@@ -9,6 +9,8 @@
 #include <regex>
 #include <numeric>
 #include <unordered_map>
+#include <unordered_set>
+#include <limits>
 
 namespace AOC
 {
@@ -70,6 +72,8 @@ public:
     auto end() { return line.end(); }
     auto cbegin() const { return line.cbegin(); }
     auto cend() const { return line.cend(); }
+
+    bool Empty() const { return line.empty(); }
 
     const std::vector<std::string> GetWords() const;
 private:
