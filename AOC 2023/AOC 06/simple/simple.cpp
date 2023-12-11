@@ -26,8 +26,8 @@ D distance(T time_pressed,T total_time)
 pair<T, T> press(T time, D dist)
 {
     // take a stab at the times
-    T press0 = (time - sqrt(time * time - 4 * dist)) / 2;
-    T press1 = (time + sqrt(time * time - 4 * dist)) / 2;
+    T press0 = (T)((time - sqrt(time * time - 4 * dist)) / 2);
+    T press1 = (T)((time + sqrt(time * time - 4 * dist)) / 2);
     // check for correctness
     while (distance(press0, time) <= dist && press0<time) { press0++; }
     while (distance(press1, time) <= dist && press1>0) { press1--; }

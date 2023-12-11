@@ -3,6 +3,10 @@
 
 using namespace std;
 
+CharacterMatrix::CharacterMatrix(const char def)
+    : def(def)
+{}
+
 CharacterMatrix::CharacterMatrix(const TextFile& file, const char def)
     : def(def)
 {
@@ -46,4 +50,21 @@ const char CharacterMatrix::GetChar(const int x, const int y) const
     if (y >= (int)lines.size() || x >= (int)(lines[y].size())) return def;
     return lines.at(y).at(x);
 }
+
+CharacterMatrix CharacterMatrix::Transposed() const
+{
+    CharacterMatrix res;
+    res.lines.resize(width, string(height,def));
+    for (int h = 0; h < height; ++h)
+    {
+        for (int w = 0; w < width; ++w)
+        {
+            res.lines.at(w).at(h) = lines.at(h).at(w);
+        }
+    }
+    res.width = height;
+    res.height = width;
+    return res;
+}
+
 

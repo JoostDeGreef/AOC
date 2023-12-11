@@ -12,6 +12,7 @@
 #include <unordered_set>
 #include <limits>
 #include <map>
+#include <set>
 
 namespace AOC
 {
@@ -51,6 +52,27 @@ namespace AOC
         return v;
     }
 }
+
+struct Pos
+{
+    Pos(int64_t x, int64_t y)
+        : x(x)
+        , y(y)
+    {}
+    Pos()
+        : Pos(-1, -1)
+    {}
+
+    int64_t x = -1;
+    int64_t y = -1;
+
+    bool operator < (const Pos& p) const
+    {
+        return y < p.y || (y == p.y && x < p.x);
+    }
+
+    friend std::ostream& operator << (std::ostream& os, const Pos &p);
+};
 
 class Line
 {
@@ -107,7 +129,13 @@ public:
 
     char operator () (const int x, const int y) const { return GetChar(x, y); }
     const char GetChar(const int x, const int y) const;
+
+    const std::string& GetLine(const int y) const { return lines.at(y); }
+    void InsertLine(const int y, const std::string s) { lines.insert(lines.begin() + y, s); height++; }
+
+    CharacterMatrix Transposed() const;
 private:
+    CharacterMatrix(const char def = ' ');
     void CalcSize();
 
     std::vector<std::string> lines;
@@ -143,6 +171,10 @@ public:
         return iterx->second;
     }
 
+    bool Inside(const int x, const int y) const
+    {
+        return (x >= 0) && (x < width) && (y >= 0) && (y < height);
+    }
     int Width() const { return width; }
     int Height() const { return height; }
 private:
