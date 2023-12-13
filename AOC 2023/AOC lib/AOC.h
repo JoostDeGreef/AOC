@@ -13,20 +13,27 @@
 #include <limits>
 #include <map>
 #include <set>
+#include <condition_variable>
+#include <mutex>
+#include <queue>
+#include <functional>
 
 namespace AOC
 {
-    template<typename T> T Sum(const std::vector<T>& v)
+    template<typename T>
+    T Sum(const std::vector<T>& v)
     {
         return accumulate(v.begin(), v.end(), (T)0);
     }
 
-    template<typename T> T Reverse(T t)
+    template<typename T>
+    T Reverse(T t)
     {
         return { t.rbegin(),t.rend() };
     }
 
-    template<typename T> T Sort(T t)
+    template<typename T>
+    T Sort(T t)
     {
         std::sort(t.begin(), t.end());
         return t;
@@ -50,6 +57,48 @@ namespace AOC
                     });
             });
         return v;
+    }
+
+    template<typename TRes, typename TInput, typename Func>
+    std::vector<TRes> ForAll(const std::vector<TInput> & inputs, Func task,size_t n = 0)
+    {
+        std::vector<TRes> results;
+        results.resize(inputs.size());
+
+        std::mutex queue_mutex;
+        volatile int tasks = inputs.size();
+
+        auto GetTask = [&]()
+        {
+            std::unique_lock<std::mutex> queue_lock{ queue_mutex };
+            return --tasks;
+        };
+
+        auto worker = [&]()
+        {
+            int index = 0;
+            while ((index = GetTask()) >= 0)
+            {
+                const auto& input = inputs[index];
+                auto& result = results[index];
+
+                result = task(input);
+            }
+        };
+
+        if (n <= 0) n = std::max(std::thread::hardware_concurrency(),(unsigned int)1);
+        std::vector<std::thread> threads;
+        for (std::size_t i = 0; i < n; ++i)
+        {
+            threads.emplace_back(worker);
+        }
+
+        for (auto& t : threads)
+        {
+            t.join();
+        }
+
+        return results;
     }
 }
 
@@ -185,3 +234,4 @@ private:
     int width;
     int height;
 };
+

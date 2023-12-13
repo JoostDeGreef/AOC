@@ -176,6 +176,7 @@ I GetPosibilities(const vector<string>& parts, const vector<size_t>& seq)
 
 Data ProcessLine(const Line& line)
 {
+    cout << "<";
     const auto words = line.GetWords();
     string fields = words[0] + "?" + words[0] + "?" + words[0] + "?" + words[0] + "?" + words[0];
     vector<size_t> seq = GetSequence(words[1] + "," + words[1] + "," + words[1] + "," + words[1] + "," + words[1]);
@@ -210,6 +211,8 @@ Data ProcessLine(const Line& line)
 
     p = GetPosibilities(parts, seq);
 
+    cout << ">";
+
     return Data{ fields, seq, p };
 }
 
@@ -218,13 +221,12 @@ int main()
     TextFile f("../../AOC 12/data/simple.txt");
     //TextFile f("../../AOC 12/data/test.txt");
 
-    vector<Data> datas;
+    auto datas = AOC::ForAll<Data>(f.GetLines(),ProcessLine);
+
     I total = 0;
     int i = 0;
-    for (const auto& line : f.GetLines())
+    for (const auto& d: datas)
     {
-        Data d = ProcessLine(line);
-        datas.emplace_back(d);
         cout << ++i << " " << d.input << " ";
         for (size_t i = 0; i < d.seq.size(); ++i)
         {

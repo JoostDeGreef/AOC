@@ -40,20 +40,14 @@ int main()
         }
     }
 
-    vector<size_t> vert;
-    vector<size_t> horz;
-
-    for (const auto& block : blocks)
+    auto AddMirrors = [](const CharacterMatrix& m)
     {
-        vert.emplace_back(FindMirror(block));
-        horz.emplace_back(FindMirror(block.Transposed()));
-    }
+        return 100*FindMirror(m) + FindMirror(m.Transposed());
+    };
 
-    size_t res = 0;
-    for (size_t i = 0; i < vert.size(); ++i)
-    {
-        res += 100 * vert[i] + horz[i];
-    }
+    auto results = AOC::ForAll<size_t>(blocks, AddMirrors);
+
+    size_t res = AOC::Sum(results);
 
     cout << res << endl;
 
