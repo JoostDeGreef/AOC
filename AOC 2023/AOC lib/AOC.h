@@ -119,28 +119,30 @@ private:
 class CharacterMatrix
 {
 public:
+    CharacterMatrix(const char def = ' ');
     CharacterMatrix(const TextFile& file, const char def = ' ');
     CharacterMatrix(const TextFile& file, const int startLine, const int lineCount, const char def = ' ');
 
     friend std::ostream& operator << (std::ostream& os, const CharacterMatrix& cm);
 
-    int Width() const { return width; }
-    int Height() const { return height; }
+    size_t Width() const { return width; }
+    size_t Height() const { return height; }
 
     char operator () (const int x, const int y) const { return GetChar(x, y); }
     const char GetChar(const int x, const int y) const;
 
-    const std::string& GetLine(const int y) const { return lines.at(y); }
-    void InsertLine(const int y, const std::string s) { lines.insert(lines.begin() + y, s); height++; }
+    const std::string& GetLine(const size_t y) const { return lines.at(y); }
+    void InsertLine(const size_t y, const std::string& s) { lines.insert(lines.begin() + y, s); height++; width = std::max(width, s.size()); }
+    void AddLine(const std::string& s) { lines.push_back(s); height++; width = std::max(width, s.size()); }
+    bool Empty() const { return lines.empty(); }
 
     CharacterMatrix Transposed() const;
 private:
-    CharacterMatrix(const char def = ' ');
     void CalcSize();
 
     std::vector<std::string> lines;
-    int width;
-    int height;
+    size_t width;
+    size_t height;
     char def;
 };
 

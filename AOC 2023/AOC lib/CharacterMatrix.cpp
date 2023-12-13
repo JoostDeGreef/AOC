@@ -5,7 +5,9 @@ using namespace std;
 
 CharacterMatrix::CharacterMatrix(const char def)
     : def(def)
-{}
+{
+    CalcSize();
+}
 
 CharacterMatrix::CharacterMatrix(const TextFile& file, const char def)
     : def(def)
@@ -29,7 +31,7 @@ void CharacterMatrix::CalcSize()
     {
         if (!l.empty())
         {
-            width = std::max(width, (int)l.size());
+            width = std::max(width, l.size());
             height++;
         }
     }
@@ -55,9 +57,9 @@ CharacterMatrix CharacterMatrix::Transposed() const
 {
     CharacterMatrix res;
     res.lines.resize(width, string(height,def));
-    for (int h = 0; h < height; ++h)
+    for (size_t h = 0; h < height; ++h)
     {
-        for (int w = 0; w < width; ++w)
+        for (size_t w = 0; w < width; ++w)
         {
             res.lines.at(w).at(h) = lines.at(h).at(w);
         }
