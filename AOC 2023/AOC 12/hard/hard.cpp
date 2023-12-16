@@ -221,7 +221,7 @@ int main()
     TextFile f("../../AOC 12/data/simple.txt");
     //TextFile f("../../AOC 12/data/test.txt");
 
-    auto datas = AOC::ForAll<Data>(f.GetLines(),ProcessLine);
+    auto datas = AOC::ForAll(f.GetLines(),ProcessLine);
 
     I total = 0;
     int i = 0;

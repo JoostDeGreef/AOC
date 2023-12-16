@@ -17,6 +17,7 @@
 #include <mutex>
 #include <queue>
 #include <functional>
+#include <future>
 
 namespace AOC
 {
@@ -24,6 +25,17 @@ namespace AOC
     T Sum(const std::vector<T>& v)
     {
         return accumulate(v.begin(), v.end(), (T)0);
+    }
+
+    template<typename T>
+    T Max(const std::vector<T>& v)
+    {
+        T res(0);
+        for (const auto& a : v)
+        {
+            res = std::max(res, a);
+        }
+        return res;
     }
 
     template<typename T>
@@ -58,66 +70,52 @@ namespace AOC
             });
         return v;
     }
-
-    template<typename TRes, typename TInput, typename Func>
-    std::vector<TRes> ForAll(const std::vector<TInput> & inputs, Func task,size_t n = 0)
-    {
-        std::vector<TRes> results;
-        results.resize(inputs.size());
-
-        std::mutex queue_mutex;
-        volatile int tasks = inputs.size();
-
-        auto GetTask = [&]()
-        {
-            std::unique_lock<std::mutex> queue_lock{ queue_mutex };
-            return --tasks;
-        };
-
-        auto worker = [&]()
-        {
-            int index = 0;
-            while ((index = GetTask()) >= 0)
-            {
-                const auto& input = inputs[index];
-                auto& result = results[index];
-
-                result = task(input);
-            }
-        };
-
-        if (n <= 0) n = std::max(std::thread::hardware_concurrency(),(unsigned int)1);
-        std::vector<std::thread> threads;
-        for (std::size_t i = 0; i < n; ++i)
-        {
-            threads.emplace_back(worker);
-        }
-
-        for (auto& t : threads)
-        {
-            t.join();
-        }
-
-        return results;
-    }
 }
+
+using I = int_fast64_t;
+using U = uint_fast64_t;
 
 struct Pos
 {
-    Pos(int64_t x, int64_t y)
+    Pos(I x, I y)
         : x(x)
         , y(y)
     {}
     Pos()
         : Pos(-1, -1)
     {}
+    ~Pos() = default;
+    Pos(const Pos& p)
+        : Pos(p.x, p.y)
+    {}
+    Pos& operator=(const Pos& p)
+    {
+        x = p.x;
+        y = p.y;
+        return *this;
+    }
+    Pos(Pos&&p) noexcept
+    {
+        std::swap(p.x, x);
+        std::swap(p.y, y);
+    }
+    Pos& operator=(Pos&&p) noexcept
+    {
+        std::swap(p.x, x);
+        std::swap(p.y, y);
+        return *this;
+    }
 
-    int64_t x = -1;
-    int64_t y = -1;
+    I x = -1;
+    I y = -1;
 
     bool operator < (const Pos& p) const
     {
         return y < p.y || (y == p.y && x < p.x);
+    }
+    bool operator == (const Pos& p) const
+    {
+        return y == p.y && x == p.x;
     }
 
     friend std::ostream& operator << (std::ostream& os, const Pos &p);
@@ -147,7 +145,7 @@ public:
 
     bool Empty() const { return line.empty(); }
 
-    const std::vector<std::string> GetWords() const;
+    const std::vector<std::string> GetWords(const char separator = ' ') const;
 private:
     std::string line;
 };
@@ -180,7 +178,8 @@ public:
     char operator () (const int x, const int y) const { return GetChar(x, y); }
     const char GetChar(const int x, const int y) const;
 
-    const std::string& GetLine(const size_t y) const { return lines.at(y); }
+    std::string& GetLine(const size_t y) { return lines.at(y); }
+    std::vector<std::string>& GetLines() { return lines; }
     void InsertLine(const size_t y, const std::string& s) { lines.insert(lines.begin() + y, s); height++; width = std::max(width, s.size()); }
     void AddLine(const std::string& s) { lines.push_back(s); height++; width = std::max(width, s.size()); }
     bool Empty() const { return lines.empty(); }
@@ -204,34 +203,178 @@ public:
         , width(0)
         , height(0)
     {}
+    Grid(Grid<T> &g)
+        : def(g.def)
+        , width(g.width)
+        , height(g.height)
+        , data(g.data)
+    {}
 
-    T & operator () (const int x, const int y)
+    const T & operator () (const I x, const I y) const
     { 
-        if (x >= width) width = x + 1;
-        if (y >= height) height = y + 1;
-        auto itery = data.find(y);
-        if (itery == data.end())
+        Pos p(x, y);
+        auto iter = data.find(p);
+        if (iter == data.end())
         {
-            itery = data.emplace(y, std::unordered_map<int, T>{}).first;
+            return def;
         }
-        auto iterx = itery->second.find(x);
-        if (iterx == itery->second.end())
-        {
-            iterx = itery->second.emplace(x,def).first;
-        }
-        return iterx->second;
+        return def;
+    }
+    T& operator () (const I x, const I y)
+    {
+        Pos p(x, y);
+        return (*this)[p];
     }
 
-    bool Inside(const int x, const int y) const
+    T& operator [] (const Pos & p)
+    {
+        if (p.x >= width) width = p.x + 1;
+        if (p.y >= height) height = p.y + 1;
+        auto iter = data.find(p);
+        if (iter == data.end())
+        {
+            iter = data.emplace(p, def).first;
+        }
+        return iter->second;
+    }
+
+    bool Inside(const I x, const I y) const
     {
         return (x >= 0) && (x < width) && (y >= 0) && (y < height);
     }
-    int Width() const { return width; }
-    int Height() const { return height; }
+    I Width() const { return width; }
+    I Height() const { return height; }
 private:
-    std::unordered_map<int,std::unordered_map<int,T>> data;
-    const T def;
-    int width;
-    int height;
+    struct PosHasher
+    {
+        std::size_t operator()(const Pos& p) const
+        {
+            const size_t x = (size_t)p.x;
+            const size_t y = (size_t)p.y;
+            const size_t m = sizeof(x)*4;
+            return ((x >> m) | (x << m)) ^ y;
+        }
+    };
+    std::unordered_map<Pos,T,PosHasher> data;
+    T def;
+    I width;
+    I height;
 };
 
+class ThreadPool
+{
+public:
+    ThreadPool(const ThreadPool&) = delete;
+    ThreadPool(ThreadPool&&) = delete;
+    ThreadPool& operator=(const ThreadPool&) = delete;
+    ThreadPool& operator=(ThreadPool&&) = delete;
+    ThreadPool(size_t n = 0)
+    {
+        auto thread_func = [this]()
+        {
+            std::function<void()> task;
+            while (true)
+            {
+                std::unique_lock<std::mutex> lock(mtx);
+                cv.wait(lock, [&]() { return terminate || !tasks.empty(); });
+                if (lock.owns_lock())
+                {
+                    if (terminate)
+                    {
+                        return;
+                    }
+                    task = std::move(tasks.front());
+                    tasks.pop();
+                    lock.unlock();
+                    task();
+                }
+            }
+        };
+        if (n <= 0) n = std::max(std::thread::hardware_concurrency(), (unsigned int)1);
+        if (n > 1)
+        {
+            for (std::size_t i = 0; i < n; ++i)
+            {
+                threads.emplace_back(thread_func);
+            }
+        }
+    }
+    ~ThreadPool()
+    {
+        std::unique_lock<std::mutex> lock(mtx);
+        terminate = true;
+        lock.unlock();
+        if (!threads.empty())
+        {
+            cv.notify_all();
+            for (auto& t : threads)
+            {
+                t.join();
+            }
+        }
+    }
+
+    template<typename TInput, typename Func, typename... CommonArgs>
+    auto ForAll(const std::vector<TInput>& inputs, Func f, CommonArgs &... args)
+    {
+        using return_type = std::result_of_t<Func(TInput,CommonArgs &...)>;
+
+        std::vector<return_type> results;
+        results.reserve(inputs.size());
+
+        if (threads.empty())
+        {
+            for (const auto& input : inputs)
+            {
+                results.emplace_back(f(input,args...));
+            }
+        }
+        else
+        {
+            std::vector<std::future<return_type>> futures;
+            futures.reserve(inputs.size());
+
+            for (const auto& input : inputs)
+            {
+                auto task = std::make_shared<std::packaged_task<return_type()>>(std::bind(f, input, args...));
+
+                std::future<return_type> res = task->get_future();
+                {
+                    std::unique_lock<std::mutex> lock(mtx);
+
+                    if (terminate)
+                    {
+                        throw std::runtime_error("The thread pool has been stopped");
+                    }
+
+                    tasks.emplace([task]() -> void { (*task)(); });
+                }
+                cv.notify_one();
+                futures.emplace_back(std::move(res));
+            }
+
+            for (auto& f : futures)
+            {
+                results.emplace_back(std::move(f.get()));
+            }
+        }
+
+        return results;
+    }
+
+private:
+    std::vector<std::thread> threads;
+    std::queue<std::function<void()>> tasks;
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool terminate = false;
+};
+
+namespace AOC
+{
+    template<typename TInput, typename Func, typename... CommonArgs>
+    auto ForAll(const std::vector<TInput>& inputs, Func task, CommonArgs &... args)
+    {
+        return ThreadPool(0).ForAll(inputs, task, args...);
+    }
+}

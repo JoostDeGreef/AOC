@@ -13,16 +13,19 @@ ostream& operator<<(ostream& os, const Line& line)
     return os << line.line;
 }
 
-const vector<string> Line::GetWords() const
+const vector<string> Line::GetWords(const char separator) const
 {
     istringstream ss(line);
 
     string word;
     std::vector<std::string> words;
 
-    while (ss >> word)
+    while (std::getline(ss, word, separator)) 
     {
-        words.push_back(word);
+        if (!word.empty())
+        {
+            words.push_back(word);
+        }
     }
 
     return words;

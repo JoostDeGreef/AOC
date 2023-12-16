@@ -23,4 +23,19 @@ TEST_F(GenericTest, Reverse)
     EXPECT_STREQ("34", Reverse<std::vector<std::string>>({ "12","34" }).front().c_str());
 }
 
+TEST_F(GenericTest, ForAll)
+{
+    std::vector<int> input = { 0, 1, 2, 42 };
+    auto res = ForAll(input, [](int i) { return i; });
 
+    EXPECT_EQ(input, res);
+}
+
+TEST_F(GenericTest, Grid)
+{
+    Grid<int> g(42);
+    g[Pos(1,2)] = 1;
+
+    EXPECT_EQ(42, g(-1,0));
+    EXPECT_EQ(1, g(1, 2));
+}

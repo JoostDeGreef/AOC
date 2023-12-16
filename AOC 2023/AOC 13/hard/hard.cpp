@@ -45,9 +45,7 @@ int main()
         return 100*FindMirror(m) + FindMirror(m.Transposed());
     };
 
-    auto results = AOC::ForAll<size_t>(blocks, AddMirrors);
-
-    size_t res = AOC::Sum(results);
+    auto res = AOC::Sum(AOC::ForAll(blocks, AddMirrors));
 
     cout << res << endl;
 
